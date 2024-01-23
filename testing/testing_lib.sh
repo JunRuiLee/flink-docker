@@ -58,7 +58,13 @@ function internal_run() {
     echo >&2 "$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")"
     
     container_id=$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")
-    echo "===> ${container_id}"
+    
+    
+    sleep 5
+  
+    # 输出 /opt/flink/bin/ 目录下的内容
+    echo >&2 "===> Listing contents of /opt/flink/bin/ in ${container_id}:"
+    docker exec $container_id ls -l /opt/flink/bin/
     
     echo >&2 "===> Logs from ${container_id}:"
     docker logs -f ${container_id}
