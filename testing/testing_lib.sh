@@ -55,7 +55,6 @@ function internal_run() {
     image_name="$(image_name "$image_tag")"
 
     echo >&2 "===> Starting ${image_tag} ${args}..."
-    echo >&2 "$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")"
     
     container_id=$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")
     
