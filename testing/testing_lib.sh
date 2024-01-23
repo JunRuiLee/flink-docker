@@ -55,8 +55,13 @@ function internal_run() {
     image_name="$(image_name "$image_tag")"
 
     echo >&2 "===> Starting ${image_tag} ${args}..."
-
-    eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}"
+    echo >&2 "$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")"
+    
+    container_id=$(eval "docker run --rm --detach --network $NETWORK_NAME -e JOB_MANAGER_RPC_ADDRESS=jobmanager ${docker_run_command} $image_name ${args}")
+    echo "===> ${container_id}"
+    
+    echo >&2 "===> Logs from ${container_id}:"
+    docker logs -f ${container_id}
 }
 
 function internal_run_jobmanager() {

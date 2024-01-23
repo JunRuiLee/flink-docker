@@ -23,8 +23,6 @@ COMMAND_HISTORY_SERVER="history-server"
 
 # If unspecified, the hostname of the container is taken as the JobManager address
 JOB_MANAGER_RPC_ADDRESS=${JOB_MANAGER_RPC_ADDRESS:-$(hostname -f)}
-CONF_FILE="${FLINK_HOME}/conf/flink-conf.yaml"
-
 drop_privs_cmd() {
     if [ $(id -u) != 0 ]; then
         # Don't need to drop privs if EUID != 0
@@ -60,18 +58,25 @@ copy_plugins_if_required() {
 }
 
 set_config_option() {
-  local option=$1
-  local value=$2
+    local config_parser_script="$FLINK_HOME/bin/config-parser-utils.sh"
+    local config_dir="$FLINK_HOME/conf"
+    local bin_dir="$FLINK_HOME/bin"
+    local lib_dir="$FLINK_HOME/lib"
 
-  # escape periods for usage in regular expressions
-  local escaped_option=$(echo ${option} | sed -e "s/\./\\\./g")
+    local config_params=""
 
-  # either override an existing entry, or append a new one
-  if grep -E "^${escaped_option}:.*" "${CONF_FILE}" > /dev/null; then
-        sed -i -e "s/${escaped_option}:.*/$option: $value/g" "${CONF_FILE}"
-  else
-        echo "${option}: ${value}" >> "${CONF_FILE}"
-  fi
+    while [ $# -gt 0 ]; do
+        local key="$1"
+        local value="$2"
+
+        config_params+=" -D${key}=${value}"
+
+        shift 2
+    done
+
+    if [ ! -z "${config_params}" ]; then
+        eval "${config_parser_script} ${config_dir} ${bin_dir} ${lib_dir} ${config_params}"
+    fi
 }
 
 prepare_configuration() {
